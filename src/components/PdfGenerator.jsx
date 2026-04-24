@@ -33,35 +33,12 @@ function getImageDimensions(dataUrl) {
   })
 }
 
-// Compute "object-fit: cover" crop coordinates
-function coverFit(srcW, srcH, dstW, dstH) {
-  const srcRatio = srcW / srcH
-  const dstRatio = dstW / dstH
-
-  let cropW, cropH, sx, sy
-  if (srcRatio > dstRatio) {
-    // Source is wider — crop sides
-    cropH = srcH
-    cropW = srcH * dstRatio
-    sx = (srcW - cropW) / 2
-    sy = 0
-  } else {
-    // Source is taller — crop top/bottom
-    cropW = srcW
-    cropH = srcW / dstRatio
-    sx = 0
-    sy = (srcH - cropH) / 2
-  }
-
-  return { sx, sy, cropW, cropH }
-}
-
-async function cropImageToFit(dataUrl, srcW, srcH, isRotated = false, brighten = false) {
+async function prepareImageForPdf(dataUrl, srcW, srcH, isRotated = false, brighten = false) {
   let finalDataUrl = dataUrl
   let finalW = srcW
   let finalH = srcH
 
-  // Se a carta foi marcada para rotacionar, giramos a imagem original em 90 graus antes do corte
+  // Se a carta foi marcada para rotacionar, giramos a imagem original em 90 graus
   if (isRotated) {
     const img = new Image()
     await new Promise(r => {
@@ -83,15 +60,13 @@ async function cropImageToFit(dataUrl, srcW, srcH, isRotated = false, brighten =
     })
   }
 
-  const { sx, sy, cropW, cropH } = coverFit(finalW, finalH, CARD_W, CARD_H)
-
   // Maximum output resolution to prevent memory crashes (e.g. 600 DPI max)
   const MAX_W = Math.round((CARD_W / 25.4) * 600) // ~1464px
   const MAX_H = Math.round((CARD_H / 25.4) * 600) // ~2078px
 
-  // Don't upscale. Only downscale if it exceeds 600 DPI equivalent.
-  let outW = Math.round(cropW)
-  let outH = Math.round(cropH)
+  // Don't upscale. Only downscale se a imagem original for maior que o equivalente a 600 DPI.
+  let outW = finalW
+  let outH = finalH
 
   if (outW > MAX_W || outH > MAX_H) {
     const scale = Math.min(MAX_W / outW, MAX_H / outH)
@@ -119,7 +94,10 @@ async function cropImageToFit(dataUrl, srcW, srcH, isRotated = false, brighten =
         ctx.filter = 'brightness(1.20) contrast(1.05) saturate(1.05)'
       }
       
-      ctx.drawImage(img, sx, sy, cropW, cropH, 0, 0, outW, outH)
+      // Desenha a imagem INTEIRA no canvas (sem crop).
+      // O jsPDF irá redimensionar/esticar (stretch) a imagem para caber exatamente em 62x88mm.
+      // Isso evita o efeito de "zoom" ou "recorte" nas bordas da carta.
+      ctx.drawImage(img, 0, 0, finalW, finalH, 0, 0, outW, outH)
       ctx.filter = 'none'
       
       // Use MAXIMUM quality JPEG (1.0) to preserve absolute maximum detail for high-def printing
@@ -200,8 +178,8 @@ export default function PdfGenerator({ deck, progress, setProgress }) {
 
             if (dataUrl) {
               const dims = await getImageDimensions(dataUrl)
-              const croppedUrl = await cropImageToFit(dataUrl, dims.width, dims.height, card.rotated, options.brighten)
-              imageCache.set(card.id, croppedUrl)
+              const processedUrl = await prepareImageForPdf(dataUrl, dims.width, dims.height, card.rotated, options.brighten)
+              imageCache.set(card.id, processedUrl)
             }
           } catch (e) {
             console.error('Falha ao processar imagem para carta:', card.name, e)
