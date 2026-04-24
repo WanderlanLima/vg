@@ -122,8 +122,8 @@ async function cropImageToFit(dataUrl, srcW, srcH, isRotated = false, brighten =
       ctx.drawImage(img, sx, sy, cropW, cropH, 0, 0, outW, outH)
       ctx.filter = 'none'
       
-      // Use high-quality JPEG (0.95) to preserve details while keeping file size reasonable
-      resolve(canvas.toDataURL('image/jpeg', 0.95))
+      // Use MAXIMUM quality JPEG (1.0) to preserve absolute maximum detail for high-def printing
+      resolve(canvas.toDataURL('image/jpeg', 1.0))
     }
     img.onerror = () => resolve(finalDataUrl)
     img.src = finalDataUrl
