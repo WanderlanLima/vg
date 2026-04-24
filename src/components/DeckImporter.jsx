@@ -74,27 +74,21 @@ export default function DeckImporter({ onImport, onAddManual }) {
     let lastError = null
 
     const apiUrls = [
-      `/api/decklog-en/system/app/api/view/${code}`,
-      `/api/decklog-jp/system/app/api/view/${code}`,
-      `https://corsproxy.io/?${encodeURIComponent(`https://decklog-en.bushiroad.com/system/app/api/view/${code}`)}`,
-      `https://corsproxy.io/?${encodeURIComponent(`https://decklog.bushiroad.com/system/app/api/view/${code}`)}`
+      `/api/decklog?code=${code}&region=en`,
+      `/api/decklog?code=${code}&region=jp`
     ]
 
     for (const url of apiUrls) {
       if (cards.length > 0) break;
       try {
         const res = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-          },
           signal: AbortSignal.timeout(15000), // Aumentado para 15s pois a API as vezes é lenta
         })
         if (res.ok) {
           const data = await res.json()
           if (Array.isArray(data) && data.length === 0) continue; // Array vazio = deck não encontrado nesta região
 
-          const isEnglish = url.includes('decklog-en');
+          const isEnglish = url.includes('region=en');
           const baseUrl = isEnglish 
             ? 'https://en.cf-vanguard.com/wordpress/wp-content/images/cardlist/' 
             : 'https://cf-vanguard.com/wordpress/wp-content/images/cardlist/';
@@ -252,7 +246,7 @@ export default function DeckImporter({ onImport, onAddManual }) {
     } else if (pageLoaded) {
       setStatus({
         type: 'error',
-        message: 'Falha ao extrair as cartas. A Bushiroad (Cloudflare) bloqueou a extração.',
+        message: 'A Bushiroad bloqueou a extração automática. Para resolver: Vá ao site Deck Log, clique em "Text View", copie toda a lista em texto e cole direto no campo acima!',
       })
     } else {
       setStatus({
