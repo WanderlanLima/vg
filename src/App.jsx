@@ -5,10 +5,12 @@ import CardList from './components/CardList'
 import PdfGenerator from './components/PdfGenerator'
 import PrintTip from './components/PrintTip'
 import Footer from './components/Footer'
+import { X } from 'lucide-react'
 
 function App() {
   const [deck, setDeck] = useState([])
   const [pdfProgress, setPdfProgress] = useState({ active: false, percent: 0, message: '' })
+  const [viewImage, setViewImage] = useState(null)
 
   const addCard = useCallback((card) => {
     setDeck(prev => [...prev, {
@@ -56,9 +58,9 @@ function App() {
     <div className="min-h-screen flex flex-col">
       {/* Background decoration */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-vg-600/8 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -left-32 w-80 h-80 bg-vg-500/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-1/4 w-64 h-64 bg-vg-700/6 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-vg-600/10 rounded-full blur-[100px] animate-float-slow" />
+        <div className="absolute top-1/3 -left-32 w-80 h-80 bg-vg-500/10 rounded-full blur-[100px] animate-float-medium" />
+        <div className="absolute bottom-20 right-1/4 w-64 h-64 bg-vg-700/10 rounded-full blur-[100px] animate-float-fast" />
       </div>
 
       <Header totalCards={totalCards} deckSize={deck.length} />
@@ -76,6 +78,7 @@ function App() {
               onUpdate={updateCard}
               onRemove={removeCard}
               onClear={clearDeck}
+              onViewImage={setViewImage}
             />
 
             <PdfGenerator
@@ -113,6 +116,27 @@ function App() {
             </div>
             <p className="text-sm font-semibold text-vg-300">{Math.round(pdfProgress.percent)}%</p>
           </div>
+        </div>
+      )}
+
+      {/* Image Viewer Modal */}
+      {viewImage && (
+        <div 
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-surface-950/90 backdrop-blur-md animate-fade-in p-4 sm:p-8 cursor-zoom-out"
+          onClick={() => setViewImage(null)}
+        >
+          <button 
+            className="absolute top-6 right-6 w-10 h-10 bg-surface-800/50 hover:bg-surface-700 rounded-full flex items-center justify-center text-white transition-colors"
+            onClick={(e) => { e.stopPropagation(); setViewImage(null); }}
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <img 
+            src={viewImage} 
+            alt="Ampliada" 
+            className="max-w-full max-h-full rounded-xl shadow-2xl object-contain animate-zoom-in"
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
       )}
     </div>

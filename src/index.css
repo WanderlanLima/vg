@@ -29,34 +29,35 @@
 
 @layer components {
   .glass-card {
-    @apply bg-surface-800/60 backdrop-blur-xl border border-surface-700/50 rounded-2xl;
+    @apply bg-surface-900/40 backdrop-blur-2xl border border-surface-700/50 rounded-2xl shadow-xl shadow-black/20;
   }
 
   .glass-card-hover {
-    @apply glass-card transition-all duration-300 hover:border-vg-500/30 hover:shadow-lg hover:shadow-vg-500/5;
+    @apply glass-card transition-all duration-300 hover:border-vg-500/40 hover:shadow-2xl hover:shadow-vg-500/10 hover:bg-surface-800/50;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-vg-600 to-vg-500 
-           text-white font-semibold rounded-xl shadow-lg shadow-vg-500/20
-           hover:from-vg-500 hover:to-vg-400 hover:shadow-vg-500/30
-           active:scale-[0.98] transition-all duration-200 
-           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+    @apply relative inline-flex items-center justify-center gap-2 px-6 py-3 
+           bg-gradient-to-r from-vg-600 to-vg-500 text-white font-bold rounded-xl
+           shadow-[0_0_20px_rgba(92,124,250,0.3)] border border-vg-400/20
+           hover:from-vg-500 hover:to-vg-400 hover:shadow-[0_0_30px_rgba(92,124,250,0.5)] hover:-translate-y-0.5
+           active:scale-[0.97] transition-all duration-300 
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:translate-y-0;
   }
 
   .btn-secondary {
     @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 
-           bg-surface-700/80 border border-surface-600/50 text-surface-200 font-medium rounded-xl
-           hover:bg-surface-600/80 hover:border-surface-500/50 hover:text-white
-           active:scale-[0.98] transition-all duration-200
+           bg-surface-800/60 backdrop-blur-md border border-surface-600/50 text-surface-200 font-medium rounded-xl
+           shadow-lg shadow-black/10 hover:bg-surface-700/80 hover:border-surface-500/80 hover:text-white
+           active:scale-[0.97] transition-all duration-300
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-danger {
     @apply inline-flex items-center justify-center gap-2 px-3 py-1.5
            bg-red-500/10 border border-red-500/20 text-red-400 font-medium rounded-lg text-sm
-           hover:bg-red-500/20 hover:border-red-500/30 hover:text-red-300
-           active:scale-[0.98] transition-all duration-200;
+           hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-300 hover:shadow-[0_0_15px_rgba(239,68,68,0.2)]
+           active:scale-[0.97] transition-all duration-300;
   }
 
   .input-field {

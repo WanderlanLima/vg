@@ -56,7 +56,7 @@ function coverFit(srcW, srcH, dstW, dstH) {
   return { sx, sy, cropW, cropH }
 }
 
-async function cropImageToFit(dataUrl, srcW, srcH, isRotated = false) {
+async function cropImageToFit(dataUrl, srcW, srcH, isRotated = false, brighten = false) {
   let finalDataUrl = dataUrl
   let finalW = srcW
   let finalH = srcH
@@ -113,7 +113,14 @@ async function cropImageToFit(dataUrl, srcW, srcH, isRotated = false) {
       // Clear canvas with white background in case of transparency
       ctx.fillStyle = '#ffffff'
       ctx.fillRect(0, 0, outW, outH)
+      
+      if (brighten) {
+        // Increase brightness for dark prints (common issue with proxies)
+        ctx.filter = 'brightness(1.20) contrast(1.05) saturate(1.05)'
+      }
+      
       ctx.drawImage(img, sx, sy, cropW, cropH, 0, 0, outW, outH)
+      ctx.filter = 'none'
       
       // Use high-quality JPEG (0.95) to preserve details while keeping file size reasonable
       resolve(canvas.toDataURL('image/jpeg', 0.95))
@@ -129,7 +136,8 @@ export default function PdfGenerator({ deck, progress, setProgress }) {
     cropMarks: true,
     borders: true,
     instructions: false,
-    silhouetteMarks: false
+    silhouetteMarks: false,
+    brighten: false
   })
 
   const totalCards = deck.reduce((s, c) => s + c.quantity, 0)
@@ -192,7 +200,7 @@ export default function PdfGenerator({ deck, progress, setProgress }) {
 
             if (dataUrl) {
               const dims = await getImageDimensions(dataUrl)
-              const croppedUrl = await cropImageToFit(dataUrl, dims.width, dims.height, card.rotated)
+              const croppedUrl = await cropImageToFit(dataUrl, dims.width, dims.height, card.rotated, options.brighten)
               imageCache.set(card.id, croppedUrl)
             }
           } catch (e) {
@@ -378,87 +386,47 @@ export default function PdfGenerator({ deck, progress, setProgress }) {
       </div>
 
       {/* Options Panel */}
-      <div className="mt-5 p-4 rounded-xl bg-surface-900/50 border border-surface-800 flex flex-col sm:flex-row gap-4 sm:gap-8">
-        <div className="flex items-center gap-2 text-sm text-white mb-2 sm:mb-0 w-full sm:w-auto">
-          <Settings2 className="w-4 h-4 text-vg-400" />
-          <span className="font-semibold">Opções de Impressão</span>
+      <div className="mt-6 p-5 rounded-2xl bg-surface-900/40 border border-surface-700/50 flex flex-col xl:flex-row gap-5 xl:gap-8 items-start xl:items-center">
+        <div className="flex items-center gap-2 text-sm text-white font-bold w-full xl:w-auto">
+          <Settings2 className="w-5 h-5 text-vg-400" />
+          <span>Configurações</span>
         </div>
         
-        <div className="flex flex-wrap gap-4 sm:gap-6">
-          <label className="flex items-center gap-2 cursor-pointer group">
-            <div className="relative flex items-center justify-center">
-              <input 
-                type="checkbox" 
-                checked={options.borders}
-                onChange={e => setOptions(p => ({...p, borders: e.target.checked}))}
-                className="sr-only" 
-              />
-              <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${options.borders ? 'bg-vg-500 border-vg-500' : 'bg-surface-800 border-surface-600 group-hover:border-vg-500'}`}>
-                {options.borders && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-              </div>
-            </div>
-            <span className="text-sm text-surface-300 group-hover:text-white transition-colors">Bordas Pretas</span>
-          </label>
-
-          <label className="flex items-center gap-2 cursor-pointer group">
-            <div className="relative flex items-center justify-center">
-              <input 
-                type="checkbox" 
-                checked={options.cropMarks}
-                onChange={e => setOptions(p => ({...p, cropMarks: e.target.checked}))}
-                className="sr-only" 
-              />
-              <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${options.cropMarks ? 'bg-vg-500 border-vg-500' : 'bg-surface-800 border-surface-600 group-hover:border-vg-500'}`}>
-                {options.cropMarks && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-              </div>
-            </div>
-            <span className="text-sm text-surface-300 group-hover:text-white transition-colors">Guias de Corte (Cruzes)</span>
-          </label>
-
-          <label className="flex items-center gap-2 cursor-pointer group">
-            <div className="relative flex items-center justify-center">
-              <input 
-                type="checkbox" 
-                checked={options.spacing}
-                onChange={e => setOptions(p => ({...p, spacing: e.target.checked}))}
-                className="sr-only" 
-              />
-              <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${options.spacing ? 'bg-vg-500 border-vg-500' : 'bg-surface-800 border-surface-600 group-hover:border-vg-500'}`}>
-                {options.spacing && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-              </div>
-            </div>
-            <span className="text-sm text-surface-300 group-hover:text-white transition-colors">Espaçamento (2.5mm)</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer group">
-            <div className="relative flex items-center justify-center">
-              <input 
-                type="checkbox" 
-                checked={options.instructions}
-                onChange={e => setOptions(p => ({...p, instructions: e.target.checked}))}
-                className="sr-only" 
-              />
-              <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${options.instructions ? 'bg-vg-500 border-vg-500' : 'bg-surface-800 border-surface-600 group-hover:border-vg-500'}`}>
-                {options.instructions && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-              </div>
-            </div>
-            <span className="text-sm text-surface-300 group-hover:text-white transition-colors">Folha de Instruções</span>
-          </label>
-
-          <label className="flex items-center gap-2 cursor-pointer group">
-            <div className="relative flex items-center justify-center">
-              <input 
-                type="checkbox" 
-                checked={options.silhouetteMarks}
-                onChange={e => setOptions(p => ({...p, silhouetteMarks: e.target.checked}))}
-                className="sr-only" 
-              />
-              <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${options.silhouetteMarks ? 'bg-vg-500 border-vg-500' : 'bg-surface-800 border-surface-600 group-hover:border-vg-500'}`}>
-                {options.silhouetteMarks && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-              </div>
-            </div>
-            <span className="text-sm text-surface-300 group-hover:text-white transition-colors">Marcas P/ Plotter (Silhouette)</span>
-          </label>
+        <div className="flex flex-wrap gap-3">
+          {[
+            { id: 'borders', label: 'Bordas Pretas' },
+            { id: 'cropMarks', label: 'Guias de Corte' },
+            { id: 'spacing', label: 'Espaçamento (2.5mm)' },
+            { id: 'instructions', label: 'Folha de Instruções' },
+            { id: 'silhouetteMarks', label: 'Marcas Silhouette' },
+            { id: 'brighten', label: 'Clarear (+Brilho)' }
+          ].map((opt) => (
+            <button
+              key={opt.id}
+              onClick={() => setOptions(p => ({ ...p, [opt.id]: !p[opt.id] }))}
+              className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 border ${
+                options[opt.id]
+                  ? 'bg-vg-500/10 border-vg-500/50 text-vg-300 shadow-[0_0_10px_rgba(92,124,250,0.1)]'
+                  : 'bg-surface-800/50 border-surface-700 hover:border-surface-600 text-surface-400 hover:text-surface-300'
+              }`}
+            >
+              <div className={`w-2 h-2 rounded-full transition-colors duration-300 ${options[opt.id] ? 'bg-vg-400 shadow-[0_0_5px_rgba(92,124,250,0.8)]' : 'bg-surface-600'}`} />
+              {opt.label}
+            </button>
+          ))}
         </div>
+      </div>
+
+      {/* Warning/Tip for horizontal cards */}
+      <div className="mt-4 p-4 bg-gradient-to-r from-blue-500/10 to-blue-400/5 border border-blue-500/20 rounded-2xl flex items-start gap-4">
+        <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg className="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <p className="text-sm text-blue-200 leading-relaxed">
+          <strong className="text-blue-300 font-bold">Dica:</strong> Se houver alguma carta na horizontal, use o botão <strong className="text-white bg-surface-800 px-1.5 py-0.5 rounded text-xs">Girar</strong> nela antes de gerar o PDF.
+        </p>
       </div>
 
       {/* Specs preview */}
@@ -474,17 +442,6 @@ export default function PdfGenerator({ deck, progress, setProgress }) {
             <p className="text-sm font-bold text-white mt-0.5">{spec.value}</p>
           </div>
         ))}
-      </div>
-
-      <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-3">
-        <div className="text-blue-400 mt-0.5">
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <p className="text-sm text-blue-200">
-          <strong className="text-blue-300 font-semibold">Dica Importante:</strong> Se alguma carta estiver na horizontal na lista, lembre-se de usar o botão <strong className="text-white font-semibold">Girar</strong> nela antes de gerar o PDF para que ela seja impressa na vertical, sem cortes!
-        </p>
       </div>
     </section>
   )

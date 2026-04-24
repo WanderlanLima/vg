@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
-import { Trash2, Upload, GripVertical, ImagePlus, Minus, Plus, Edit3, Check, RefreshCw, RotateCw } from 'lucide-react'
+import { Trash2, Upload, GripVertical, ImagePlus, Minus, Plus, Edit3, Check, RefreshCw, RotateCw, Maximize2 } from 'lucide-react'
 
-function CardItem({ card, onUpdate, onRemove }) {
+function CardItem({ card, onUpdate, onRemove, onViewImage, index }) {
   const [isDragging, setIsDragging] = useState(false)
   const [isEditingName, setIsEditingName] = useState(false)
   const [editName, setEditName] = useState(card.name)
@@ -49,7 +49,11 @@ function CardItem({ card, onUpdate, onRemove }) {
   }
 
   return (
-    <div className="glass-card-hover p-4 animate-slide-up group" id={`card-${card.id}`}>
+    <div 
+      className="glass-card-hover p-4 animate-slide-up group hover:-translate-y-1 hover:shadow-2xl transition-all duration-300" 
+      id={`card-${card.id}`}
+      style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'both' }}
+    >
       <div className="flex gap-4">
         {/* Drag handle */}
         <div className="flex items-center">
@@ -58,18 +62,17 @@ function CardItem({ card, onUpdate, onRemove }) {
 
         {/* Image dropzone */}
         <div
-          className={`relative w-[72px] h-[100px] flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all duration-200 cursor-pointer ${
+          className={`relative w-[72px] h-[100px] flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all duration-300 ${
             isDragging
               ? 'border-vg-400 bg-vg-500/15 shadow-lg shadow-vg-500/10'
               : card.imageUrl
-              ? 'border-surface-600/30 hover:border-vg-500/30'
-              : 'border-dashed border-surface-600/50 hover:border-vg-500/30 bg-surface-800/50'
+              ? 'border-surface-600/30 hover:border-vg-500/50 hover:shadow-lg'
+              : 'border-dashed border-surface-600/50 hover:border-vg-500/50 bg-surface-800/50 hover:bg-surface-800/80 cursor-pointer'
           }`}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
-          onClick={() => fileInputRef.current?.click()}
-          title="Clique ou arraste uma imagem"
+          onClick={() => !card.imageUrl && fileInputRef.current?.click()}
         >
           {card.imageUrl ? (
             <img
@@ -80,19 +83,32 @@ function CardItem({ card, onUpdate, onRemove }) {
                   ? { width: '100px', height: '72px', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(90deg)' } 
                   : {}
               }
-              className={`object-cover transition-transform duration-300 ${!card.rotated ? 'w-full h-full' : ''}`}
+              className={`object-cover transition-transform duration-500 group-hover:scale-110 ${!card.rotated ? 'w-full h-full' : ''}`}
             />
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-surface-500 gap-1">
+            <div className="flex flex-col items-center justify-center h-full text-surface-500 gap-1 transition-colors group-hover:text-vg-400">
               <ImagePlus className="w-5 h-5" />
-              <span className="text-[9px] font-medium">Imagem</span>
+              <span className="text-[9px] font-medium">Upload</span>
             </div>
           )}
 
           {/* Upload overlay on hover */}
           {card.imageUrl && (
-            <div className="absolute inset-0 bg-surface-900/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <Upload className="w-4 h-4 text-white" />
+            <div className="absolute inset-0 bg-surface-950/80 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-2 backdrop-blur-[2px]">
+              <button 
+                onClick={(e) => { e.stopPropagation(); onViewImage(card.imageUrl); }}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors transform hover:scale-110"
+                title="Ampliar"
+              >
+                <Maximize2 className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors transform hover:scale-110"
+                title="Trocar Imagem"
+              >
+                <Upload className="w-4 h-4" />
+              </button>
             </div>
           )}
 
@@ -163,7 +179,7 @@ function CardItem({ card, onUpdate, onRemove }) {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex items-center gap-2 opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 delay-75">
               <button
                 onClick={() => onUpdate(card.id, { rotated: !card.rotated })}
                 className="btn-secondary px-2 py-1.5"
@@ -187,7 +203,7 @@ function CardItem({ card, onUpdate, onRemove }) {
   )
 }
 
-export default function CardList({ deck, onUpdate, onRemove, onClear }) {
+export default function CardList({ deck, onUpdate, onRemove, onClear, onViewImage }) {
   const [isFetchingImages, setIsFetchingImages] = useState(false)
   const totalCopies = deck.reduce((s, c) => s + c.quantity, 0)
   const withImages = deck.filter(c => c.imageUrl).length
@@ -298,12 +314,14 @@ export default function CardList({ deck, onUpdate, onRemove, onClear }) {
 
       {/* Cards grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {deck.map(card => (
+        {deck.map((card, index) => (
           <CardItem
             key={card.id}
             card={card}
+            index={index}
             onUpdate={onUpdate}
             onRemove={onRemove}
+            onViewImage={onViewImage}
           />
         ))}
       </div>

@@ -1,27 +1,38 @@
-import { Sword, Layers } from 'lucide-react'
+import { Layers, Sparkles } from 'lucide-react'
 
 export default function Header({ totalCards, deckSize }) {
   return (
-    <header className="relative z-10 border-b border-surface-800/80">
+    <header className="sticky top-0 z-50 bg-surface-950/60 backdrop-blur-2xl border-b border-surface-800/50 shadow-lg shadow-cyan-900/10">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-vg-500 to-vg-700 flex items-center justify-center shadow-lg shadow-vg-500/20">
-              <Sword className="w-5 h-5 text-white" />
+          {/* Logo Vanguard Style */}
+          <div className="flex items-center gap-4">
+            <div className="relative flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 group cursor-default">
+              <div className="absolute inset-0 bg-cyan-500 rounded-lg blur-lg opacity-40 group-hover:opacity-70 transition-opacity duration-500 animate-pulse-glow" />
+              <div className="relative w-full h-full bg-gradient-to-br from-cyan-400 via-vg-500 to-indigo-700 rounded-lg transform rotate-45 border border-white/30 shadow-[0_0_15px_rgba(34,211,238,0.4)] flex items-center justify-center overflow-hidden transition-transform duration-500 group-hover:rotate-[225deg]">
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+              </div>
+              <div className="absolute font-black text-2xl sm:text-3xl italic text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] pr-1 tracking-tighter select-none z-10" style={{ fontFamily: 'Impact, sans-serif' }}>
+                V
+              </div>
             </div>
-            <div>
-              <h1 className="text-lg sm:text-xl font-extrabold tracking-tight">
-                <span className="bg-gradient-to-r from-vg-300 to-vg-500 bg-clip-text text-transparent">
+            
+            <div className="flex flex-col justify-center">
+              <h1 className="text-xl sm:text-2xl font-black tracking-tight italic flex items-center">
+                <span className="bg-gradient-to-r from-cyan-300 via-blue-100 to-cyan-300 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]">
                   VG Proxy
                 </span>
-                <span className="text-surface-400 font-medium ml-1.5 text-sm hidden sm:inline">
+                <span className="text-cyan-500/80 font-bold text-xs sm:text-sm uppercase tracking-widest hidden sm:inline transform -skew-x-12 ml-3">
                   Printer
                 </span>
               </h1>
-              <p className="text-[10px] text-surface-500 font-medium tracking-wider uppercase hidden sm:block">
-                Cardfight!! Vanguard
-              </p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <Sparkles className="w-3 h-3 text-cyan-400 animate-pulse" />
+                <p className="text-[9px] sm:text-[10px] text-cyan-300/80 font-bold tracking-[0.2em] uppercase hidden sm:block">
+                  Cardfight!! Vanguard
+                </p>
+                <div className="hidden sm:block h-[1px] w-12 bg-gradient-to-r from-cyan-400/50 to-transparent ml-2" />
+              </div>
             </div>
           </div>
 

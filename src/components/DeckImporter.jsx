@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Download, Plus, Search, AlertCircle, CheckCircle2, ImagePlus } from 'lucide-react'
+import { Download, Plus, Search, AlertCircle, CheckCircle2, ImagePlus, ExternalLink } from 'lucide-react'
 
 const CORS_PROXIES = [
   'https://api.allorigins.win/raw?url=',
@@ -281,66 +281,110 @@ export default function DeckImporter({ onImport, onAddManual }) {
   }
 
   return (
-    <section className="glass-card p-6 animate-fade-in" id="deck-importer">
-      <div className="flex items-center gap-3 mb-5">
-        <div className="w-9 h-9 rounded-lg bg-vg-500/15 flex items-center justify-center">
-          <Search className="w-4.5 h-4.5 text-vg-400" />
-        </div>
-        <div>
-          <h2 className="text-base font-bold text-white">Importar Deck List</h2>
-          <p className="text-xs text-surface-400">Cole o código do Deck Log da Bushiroad</p>
-        </div>
-      </div>
+    <section className="glass-card relative overflow-hidden animate-fade-in group" id="deck-importer">
+      {/* Decorative gradient background inside the card */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-vg-400 via-vg-500 to-vg-600 opacity-80" />
+      <div className="absolute inset-0 bg-gradient-to-b from-vg-500/5 to-transparent pointer-events-none" />
 
-      <div className="flex flex-col sm:flex-row gap-3">
-        <input
-          id="deck-code-input"
-          type="text"
-          value={deckCode}
-          onChange={(e) => setDeckCode(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleImport()}
-          placeholder="Ex: 8AL5"
-          className="input-field flex-1"
-          disabled={loading}
-        />
-        <button
-          id="import-btn"
-          onClick={handleImport}
-          disabled={loading}
-          className="btn-primary whitespace-nowrap"
-        >
-          {loading ? (
-            <>
-              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-              Importando...
-            </>
-          ) : (
-            <>
-              <Download className="w-4 h-4" />
-              Importar
-            </>
-          )}
-        </button>
-        
-        <input
-          type="file"
-          multiple
-          accept="image/*"
-          className="hidden"
-          ref={fileInputRef}
-          onChange={handleFileUpload}
-        />
-        <button
-          id="manual-add-btn"
-          onClick={() => fileInputRef.current?.click()}
-          className="btn-secondary whitespace-nowrap"
-        >
-          <ImagePlus className="w-4 h-4" />
-          Upload Cartas
-        </button>
+      <div className="p-6 sm:p-8 relative z-10">
+        <div className="flex flex-col items-center text-center mb-8">
+          <div className="w-14 h-14 rounded-2xl bg-vg-500/10 border border-vg-500/20 flex items-center justify-center mb-4 shadow-lg shadow-vg-500/5">
+            <Search className="w-6 h-6 text-vg-400" />
+          </div>
+          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight mb-2">Importar Deck List</h2>
+          <p className="text-sm text-surface-400 max-w-md">
+            Cole o código do <span className="text-vg-300 font-semibold">Deck Log da Bushiroad</span> para começar, ou envie as imagens manualmente.
+          </p>
+        </div>
+
+        <div className="max-w-2xl mx-auto flex flex-col sm:flex-row gap-3 items-center">
+          <div className="relative flex-1 w-full group/input">
+            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+              <Search className="w-5 h-5 text-surface-500 group-focus-within/input:text-vg-400 transition-colors" />
+            </div>
+            <input
+              id="deck-code-input"
+              type="text"
+              value={deckCode}
+              onChange={(e) => setDeckCode(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleImport()}
+              placeholder="Ex: 8AL5 ou cole o deck de texto..."
+              className="w-full pl-12 pr-4 py-4 bg-surface-950/50 border-2 border-surface-700/60 rounded-2xl
+                         text-white placeholder-surface-500 font-semibold text-lg
+                         focus:outline-none focus:border-vg-500/60 focus:ring-4 focus:ring-vg-500/10 focus:bg-surface-900/80
+                         transition-all duration-300 shadow-inner"
+              disabled={loading}
+            />
+          </div>
+          
+          <button
+            id="import-btn"
+            onClick={handleImport}
+            disabled={loading}
+            className="w-full sm:w-auto btn-primary py-4 px-8 text-lg rounded-2xl h-[60px]"
+          >
+            {loading ? (
+              <>
+                <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Importando...
+              </>
+            ) : (
+              <>
+                <Download className="w-5 h-5" />
+                Importar
+              </>
+            )}
+          </button>
+        </div>
+
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
+          {/* Upload Manual */}
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+          />
+          <button
+            id="manual-add-btn"
+            onClick={() => fileInputRef.current?.click()}
+            className="group flex items-center gap-2 text-sm font-medium text-surface-400 hover:text-white transition-colors px-4 py-2 rounded-full hover:bg-surface-800/50 border border-transparent hover:border-surface-700"
+            title="Adicionar imagens do seu computador"
+          >
+            <ImagePlus className="w-4 h-4 text-surface-500 group-hover:text-vg-400 transition-colors" />
+            Upload Manual
+          </button>
+
+          <div className="hidden sm:block w-px h-4 bg-surface-700/50" />
+
+          {/* Links Externos */}
+          <a
+            href="https://decklog-en.bushiroad.com/create?c=1"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center gap-2 text-sm font-medium text-surface-400 hover:text-white transition-colors px-4 py-2 rounded-full hover:bg-surface-800/50 border border-transparent hover:border-surface-700"
+            title="Criar um deck no site oficial da Bushiroad"
+          >
+            <ExternalLink className="w-4 h-4 text-surface-500 group-hover:text-vg-400 transition-colors" />
+            Criar no Deck Log
+          </a>
+
+          <a
+            href="https://vg-paradox.com/subpage/TopDecks"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center gap-2 text-sm font-medium text-surface-400 hover:text-white transition-colors px-4 py-2 rounded-full hover:bg-surface-800/50 border border-transparent hover:border-surface-700"
+            title="Ver os melhores decks do meta atual"
+          >
+            <ExternalLink className="w-4 h-4 text-surface-500 group-hover:text-vg-400 transition-colors" />
+            Ver Top Decks (Paradox)
+          </a>
+        </div>
       </div>
 
       {/* Status feedback */}
