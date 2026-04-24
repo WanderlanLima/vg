@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test API</title>
+</head>
+<body>
+    <div id="result">Waiting...</div>
+    <script>
+        async function test() {
+            try {
+                const res = await fetch('https://corsproxy.io/?https://decklog-en.bushiroad.com/system/app/api/view/1U2W1', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                const text = await res.text();
+                document.getElementById('result').innerText = 'EN OK: ' + text.substring(0, 500);
+            } catch (e) {
+                document.getElementById('result').innerText = 'EN ERR: ' + e.message;
+            }
+        }
+        test();
+    </script>
+</body>
+</html>

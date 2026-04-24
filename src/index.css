@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(92, 124, 250, 0.3);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(92, 124, 250, 0.5);
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-surface-800/60 backdrop-blur-xl border border-surface-700/50 rounded-2xl;
+  }
+
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300 hover:border-vg-500/30 hover:shadow-lg hover:shadow-vg-500/5;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-vg-600 to-vg-500 
+           text-white font-semibold rounded-xl shadow-lg shadow-vg-500/20
+           hover:from-vg-500 hover:to-vg-400 hover:shadow-vg-500/30
+           active:scale-[0.98] transition-all duration-200 
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 
+           bg-surface-700/80 border border-surface-600/50 text-surface-200 font-medium rounded-xl
+           hover:bg-surface-600/80 hover:border-surface-500/50 hover:text-white
+           active:scale-[0.98] transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 px-3 py-1.5
+           bg-red-500/10 border border-red-500/20 text-red-400 font-medium rounded-lg text-sm
+           hover:bg-red-500/20 hover:border-red-500/30 hover:text-red-300
+           active:scale-[0.98] transition-all duration-200;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 bg-surface-900/80 border border-surface-700/60 rounded-xl
+           text-white placeholder-surface-500 font-medium
+           focus:outline-none focus:border-vg-500/50 focus:ring-2 focus:ring-vg-500/20
+           transition-all duration-200;
+  }
+
+  .dropzone {
+    @apply relative flex flex-col items-center justify-center gap-3 p-6
+           border-2 border-dashed border-surface-600/50 rounded-2xl
+           bg-surface-900/40 cursor-pointer
+           hover:border-vg-500/40 hover:bg-vg-500/5
+           transition-all duration-300;
+  }
+
+  .dropzone-active {
+    @apply border-vg-400 bg-vg-500/10 shadow-lg shadow-vg-500/10;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
+           bg-vg-500/15 text-vg-300 border border-vg-500/20;
+  }
+
+  .shimmer-bg {
+    background: linear-gradient(
+      90deg,
+      rgba(92, 124, 250, 0) 0%,
+      rgba(92, 124, 250, 0.08) 50%,
+      rgba(92, 124, 250, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+  }
+}

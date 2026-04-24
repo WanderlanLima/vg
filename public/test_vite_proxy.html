@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Vite Proxy</title>
+</head>
+<body>
+    <div id="result">Waiting...</div>
+    <script>
+        async function test() {
+            try {
+                const url = '/api/decklog-en/system/app/api/view/1U2W1';
+                const res = await fetch(url, { method: 'POST', headers: { 'Accept': 'application/json' } });
+                const json = await res.json();
+                document.getElementById('result').textContent = 'CARD0: ' + JSON.stringify(json.list[0]);
+            } catch (e) {
+                document.getElementById('result').textContent = 'ERROR: ' + e.message;
+            }
+        }
+        test();
+    </script>
+</body>
+</html>

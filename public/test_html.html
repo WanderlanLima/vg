@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test HTML</title>
+</head>
+<body>
+    <div id="result">Waiting...</div>
+    <script>
+        async function test() {
+            try {
+                const res = await fetch('https://api.codetabs.com/v1/proxy?quest=https://decklog-en.bushiroad.com/view/1U2W1');
+                const html = await res.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const scripts = doc.querySelectorAll('script');
+                let found = 'NOT FOUND';
+                for (const script of scripts) {
+                    if (script.textContent.includes('window.DeckLog')) {
+                        found = script.textContent.substring(0, 1000); // truncate
+                        break;
+                    }
+                }
+                document.getElementById('result').innerText = 'EN OK: ' + found;
+            } catch (e) {
+                document.getElementById('result').innerText = 'EN ERR: ' + e.message;
+            }
+        }
+        test();
+    </script>
+</body>
+</html>
