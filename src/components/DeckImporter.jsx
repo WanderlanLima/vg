@@ -15,7 +15,46 @@ export default function DeckImporter({ onImport, onAddManual }) {
   const handleImport = async () => {
     let rawCode = deckCode.trim()
     if (!rawCode) {
-      setStatus({ type: 'error', message: 'Digite um código de Deck Log.' })
+      setStatus({ type: 'error', message: 'Digite um código ou cole a lista em texto.' })
+      return
+    }
+
+    // Verifica se o usuário colou uma lista de texto (várias linhas ou padrão "4x Carta")
+    if (rawCode.includes('\n') || /^\d+[xX]\s/m.test(rawCode)) {
+      setLoading(true)
+      const lines = rawCode.split('\n')
+      const parsedCards = new Map()
+      
+      lines.forEach(line => {
+        const text = line.trim()
+        if (!text) return
+        
+        // Match "4x Card Name" or "4 Card Name"
+        const match = text.match(/^(\d+)[xX]?\s+(.+)$/)
+        let name = text
+        let quantity = 1
+        
+        if (match) {
+          quantity = parseInt(match[1])
+          name = match[2].trim()
+        }
+
+        if (parsedCards.has(name)) {
+          parsedCards.get(name).quantity += quantity
+        } else {
+          parsedCards.set(name, { name, quantity, imageUrl: null, imageBlob: null })
+        }
+      })
+
+      const cards = Array.from(parsedCards.values())
+      if (cards.length > 0) {
+        onImport(cards)
+        setStatus({ type: 'success', message: `${cards.length} carta(s) importada(s) via texto!` })
+        setDeckCode('')
+      } else {
+        setStatus({ type: 'error', message: 'Não foi possível reconhecer o texto.' })
+      }
+      setLoading(false)
       return
     }
 
@@ -36,7 +75,9 @@ export default function DeckImporter({ onImport, onAddManual }) {
 
     const apiUrls = [
       `/api/decklog-en/system/app/api/view/${code}`,
-      `/api/decklog-jp/system/app/api/view/${code}`
+      `/api/decklog-jp/system/app/api/view/${code}`,
+      `https://corsproxy.io/?${encodeURIComponent(`https://decklog-en.bushiroad.com/system/app/api/view/${code}`)}`,
+      `https://corsproxy.io/?${encodeURIComponent(`https://decklog.bushiroad.com/system/app/api/view/${code}`)}`
     ]
 
     for (const url of apiUrls) {
